@@ -7,7 +7,7 @@ import random
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!",intents = intents,status=discord.Status.dnd,activity=discord.Activity(name='TSC',type=discord.ActivityType.watching))
 
-x = pymongo.MongoClient("DB connection string")
+x = pymongo.MongoClient("connection string")
 LB = x.Leaderboard
 lb_users = LB.User
 lb_teams = LB.Team
@@ -17,6 +17,26 @@ uT = x.Users
 Team = uT.Team
 questions = x.Questions
 que = questions.Questions
+
+#Maintenence comannds
+@bot.command()
+@commands.is_owner()
+async def syncguild(ctx):
+    await bot.tree.sync(guild=ctx.guild)
+    await ctx.send("Successfully Synced")
+
+
+@bot.command()
+@commands.is_owner()
+async def syncall(ctx):
+    await bot.tree.sync()
+    await ctx.send("Successfully Synced to all guilds")
+
+@bot.command()
+@commands.is_owner()
+async def starteloop(ctx):
+    question_sender.start()
+    await ctx.send("Successfully Started")
 
 
 def assign_team(id):
@@ -184,6 +204,7 @@ async def question_checker():
 @bot.event
 async def on_message(message):
     global question_info
+    await bot.process_commands(message)
     if message.content and message.channel.id == 931869372425830410:
         if message.author.id == bot.user.id:
             return
@@ -203,21 +224,6 @@ async def on_message(message):
                 await channel.send(f"<@{message.author.id}> got the answer. 5 points for team {team}")
 
 
-#Maintenence comannds
-@bot.command()
-@commands.is_owner()
-async def syncTM(ctx):
-    if ctx.author.id == 705992469426339841:
-        await bot.tree.sync(guild=ctx.guild)
-        await ctx.send("Successfully Synced")
 
 
-@bot.command()
-@commands.is_owner()
-async def syncall(ctx):
-    if ctx.author.id == 705992469426339841:
-        await bot.tree.sync()
-        await ctx.send("Successfully Synced to all guilds")
-
-question_sender.start()
 bot.run("")
