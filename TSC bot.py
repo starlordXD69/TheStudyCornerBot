@@ -96,6 +96,12 @@ async def ping(ctx):
     await ctx.response.send_message(f"pong: {bot.latency}")
 
 @bot.tree.command()
+async def team(ctx:discord.Interaction,user:discord.User = None):
+    """See who is on what team."""
+    await ctx.response.defer()
+
+
+@bot.tree.command()
 async def repo(ctx:discord.Interaction):
     """The Repository for this bot"""
     await ctx.response.send_message("https://github.com/starlordXD69/TheStudyCornerBot")
@@ -182,6 +188,7 @@ async def question_sender():
     send = await channel.send(embed=embed)
     try:
         await send.pin()
+        await channel.purge(limit=1,reason="Deleting pin message")
     except:
         pass
     question_info = {'answer':answer,'embed':send,'channel':channel.id}
@@ -196,6 +203,7 @@ async def question_checker():
         await channel.send('No one got the answer. Too bad :/')
         try:
             await sendt.unpin()
+            await sendt.delete()
         except:
             pass
         question_info = None
@@ -226,4 +234,4 @@ async def on_message(message):
 
 
 
-bot.run("")
+bot.run("TOKEN")
