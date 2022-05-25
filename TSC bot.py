@@ -169,6 +169,47 @@ async def playerreset(ctx:discord.Interaction,user:discord.User):
         await ctx.followup.send("Successfully deleted.")
     except Exception as e:
         await ctx.followup.send(f"Error: {e}")
+
+#staff commands
+@bot.tree.command(guild=discord.Object(931371668461486080))
+@commands.has_role(947852612735213578)
+async def view_question(ctx:discord.Interaction):
+    await ctx.response.send_message('What question number? ex: 49')
+    def check(message):
+        return (message.channel == ctx.channel) and (message.author == ctx.user)
+    try:
+        msg = await bot.wait_for('message', timeout=30, check=check)
+    except asyncio.TimeoutError:
+        await ctx.followup.send('You didn\'t respond... Cancelling')
+    else:
+        amount = que.find_one({'question':"STARLORD"})
+        amount = amount.get('amount')
+        if int(msg.content) > amount or int(msg.content) < 0:
+            await ctx.followup.send("Invalid Number")
+            return
+        _question_info = que.find_one({'custom_id': int(msg.content)})
+        question = _question_info.get("question")
+        answer = _question_info.get("answer").lower()
+        embed = discord.Embed(title='The Question || Answer',color=0xee9ad9)
+        embed.set_author(name="The Study Corner", icon_url=bot.user.avatar.url)
+        embed.add_field(name=f"Question: {question}",value=f"Answer: {answer}")
+        await ctx.followup.send(embed=embed)
+
+def get_color(category:str) -> int:
+    if category == 'math':
+        return 0xFF6161
+    if category == 'word scramble':
+        return 0xFFFF61
+    if category == 'history':
+        return 0xA4FF61
+    if category == 'science':
+        return 0x61FFBC
+    if category == 'TSC':
+        return 0xF894FE
+    if category == 'geography':
+        return 0xC194FE
+    if category == 'english':
+        return 0x9494FE
 question_info = {}
 @tasks.loop(hours=1)
 async def question_sender():
@@ -181,7 +222,8 @@ async def question_sender():
     _question_info = que.find_one({'custom_id':question_num})
     question = _question_info.get("question")
     answer = _question_info.get("answer").lower()
-    embed = discord.Embed(color=0xee9ad9)
+    hex = get_color(_question_info.get("category"))
+    embed = discord.Embed(color=hex)
     embed.add_field(name="TSC-Chat Game", value=question)
     embed.set_author(name="The Study Corner", icon_url=bot.user.avatar.url)
     embed.set_footer(text=f'category: {_question_info.get("category")} || questionID: {_question_info.get("custom_id")} ')
@@ -234,4 +276,4 @@ async def on_message(message):
 
 
 
-bot.run("TOKEN")
+bot.run("")
